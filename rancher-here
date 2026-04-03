@@ -1,0 +1,39 @@
+#!/bin/bash
+# Run Claude Code with current directory as workspace
+#
+# Usage:
+#   rancher-here           # Start interactive shell (claude, claude-auto)
+#   rancher-here <command> # Run specific command directly
+
+CLAUDE_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$CLAUDE_DIR/rancher-lib.sh"
+
+rancher_ensure_image
+rancher_version_check
+rancher_get_oauth_token
+
+echo "Mounting: $CURRENT_DIR"
+
+rancher_it_flag
+
+# ~/.claude-host (ro): entrypoint copies config, plugins, projects into isolated container .claude
+# ~/.claude-writeback (rw): entrypoint syncs session data back to host after exit
+nerdctl run $IT_FLAG --rm \
+  -e "CLAUDE_PROJECT_DIR=$CURRENT_DIR" \
+  -e "CLAUDE_CODE_OAUTH_TOKEN=$OAUTH_TOKEN" \
+  -e "HOST_CLAUDE_DIR=$HOME/.claude" \
+  -v "$CURRENT_DIR:$CURRENT_DIR" \
+  -v "$HOME/.azure:/home/agent/.azure:ro" \
+  -v "$HOME/.claude.json:/home/agent/.claude.json-host:ro" \
+  -v "$HOME/.claude:/home/agent/.claude-host:ro" \
+  -v "$HOME/.claude:/home/agent/.claude-writeback" \
+  -v "$HOME/Documents/research:$HOME/Documents/research:ro" \
+  -v "$HOME/Documents/research/AI_agent:$HOME/Documents/research/AI_agent" \
+  -v "$HOME/Downloads:$HOME/Downloads" \
+  -v "$HOME/Downloads:/home/agent/Downloads" \
+  -w "$CURRENT_DIR" \
+  "$IMAGE_NAME" "$@"
+CONTAINER_EXIT=$?
+
+rancher_sync_claude_json
+exit $CONTAINER_EXIT

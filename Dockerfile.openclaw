@@ -1,0 +1,32 @@
+FROM ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Essential tools
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    ca-certificates \
+    tmux \
+    ripgrep \
+    && rm -rf /var/lib/apt/lists/*
+
+# Node.js 24 (required by OpenClaw and Claude Code)
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# OpenClaw (bust cache with build arg)
+ARG OPENCLAW_VERSION=latest
+RUN npm install -g openclaw@${OPENCLAW_VERSION}
+
+# Claude Code (installed as root; bust cache with build arg)
+ARG CLAUDE_CODE_VERSION=latest
+RUN curl -fsSL https://claude.ai/install.sh | bash
+
+ENV PATH="/root/.local/bin:${PATH}"
+ENV TERM=xterm-256color
+
+WORKDIR /workspace
+
+CMD ["openclaw", "gateway", "--port", "18789"]

@@ -1,0 +1,43 @@
+services:
+  openclaw:
+    image: openclaw:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.openclaw
+
+    # Always restart unless manually stopped
+    restart: unless-stopped
+
+    # Run as root (Rancher Desktop maps host UID 501 → container UID 0)
+    user: "0:0"
+
+    ports:
+      - "18789:18789"
+
+    env_file:
+      - /Users/hc/.openclaw/claude.env
+
+    environment:
+      - ZAI_API_KEY=c79851bd26444116983bf1e3692d164f.rLWw43d2NGUr72U7
+
+    volumes:
+      # Container-specific Claude Code config (separate from host, no conflict)
+      - /Users/hc/.openclaw/claude-container.json:/root/.claude.json
+
+      # Claude Code config and conversation history
+      - /Users/hc/.claude:/root/.claude
+
+      # OpenClaw config (Telegram token, API keys, skills, SOUL)
+      - /Users/hc/.openclaw:/root/.openclaw
+
+      # Research directory (covers Projects, AI_agent, and any future subdirectories)
+      - /Users/hc/Documents/research:/Users/hc/Documents/research
+
+    # Start OpenClaw gateway
+    command: openclaw gateway --port 18789 --bind lan
+
+    container_name: openclaw
+
+networks:
+  default:
+    name: openclaw-network
