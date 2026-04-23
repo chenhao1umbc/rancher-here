@@ -74,7 +74,7 @@ rancher_version_check() {
 import json, sys
 try:
     for p in json.load(sys.stdin):
-        print(p.get('name', ''))
+        print(p.get('id', ''))
 except: pass
 " 2>/dev/null)
     for pid in "${pids[@]}"; do wait "$pid" || true; done
