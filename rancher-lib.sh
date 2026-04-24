@@ -23,7 +23,7 @@ esac
 rancher_ensure_image() {
   if ! nerdctl image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
     echo "Building image (this may take a minute)..."
-    if nerdctl build --build-arg HOST_UID=$(id -u) -t "$IMAGE_NAME" -f Dockerfile "$CLAUDE_DIR" >/dev/null 2>&1; then
+    if nerdctl build --build-arg HOST_UID=$(id -u) -t "$IMAGE_NAME" -f "$CLAUDE_DIR/Dockerfile" "$CLAUDE_DIR" >/dev/null 2>&1; then
       echo "Image built successfully"
     else
       echo "Build failed"
@@ -53,7 +53,7 @@ rancher_version_check() {
 
   if [ -n "$host_version" ] && [ -n "$container_version" ] && [ "$host_version" != "$container_version" ]; then
     echo "Rebuilding container ($container_version -> $host_version)..."
-    if nerdctl build --build-arg HOST_UID=$(id -u) --build-arg CLAUDE_CODE_VERSION="$(date +%s)" -t "$IMAGE_NAME" -f Dockerfile "$CLAUDE_DIR" >/dev/null 2>&1; then
+    if nerdctl build --build-arg HOST_UID=$(id -u) --build-arg CLAUDE_CODE_VERSION="$(date +%s)" -t "$IMAGE_NAME" -f "$CLAUDE_DIR/Dockerfile" "$CLAUDE_DIR" >/dev/null 2>&1; then
       echo "Container updated to $host_version"
       container_version="$host_version"
     else
