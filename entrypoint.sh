@@ -19,6 +19,7 @@ if [ -d "$HOST_CLAUDE" ]; then
         [ -f "$HOST_CLAUDE/$f" ] && cp "$HOST_CLAUDE/$f" "$LOCAL_CLAUDE/$f"
     done
 
+    [ -d "$HOST_CLAUDE/hooks" ] && cp -a "$HOST_CLAUDE/hooks" "$LOCAL_CLAUDE/hooks"
     [ -d "$HOST_CLAUDE/plugins" ] && cp -a "$HOST_CLAUDE/plugins" "$LOCAL_CLAUDE/plugins"
     [ -d "$HOST_CLAUDE/projects" ] && cp -a "$HOST_CLAUDE/projects" "$LOCAL_CLAUDE/projects"
     [ -d "$HOST_CLAUDE/scripts" ] && cp -a "$HOST_CLAUDE/scripts" "$LOCAL_CLAUDE/scripts"

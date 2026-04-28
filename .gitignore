@@ -1,2 +1,13 @@
 .memsearch/
 .DS_Store
+.last-version-check
+.pm_state
+EOF
+PYEOF
+add_tests.py
+to_code_writer.md
+to_code_reviewer.md
+work_log.md
+plan.md
+project_understanding.md
+project_understanding.md.*.bak

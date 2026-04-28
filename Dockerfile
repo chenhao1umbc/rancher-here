@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     wget \
     git \
+    jq \
     ca-certificates \
     gnupg \
     lsb-release \
@@ -42,9 +43,22 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs ripgrep tmux \
     && rm -rf /var/lib/apt/lists/*
 
-# Symlink node to the macOS Homebrew path expected by host settings.json plugins
-RUN mkdir -p /opt/homebrew/opt/node@24/bin \
-    && ln -sf "$(which node)" /opt/homebrew/opt/node@24/bin/node
+# Install ruff (Python linter/formatter) — required by the PostToolUse ruff hook
+RUN pip3 install --break-system-packages --no-cache-dir ruff
+
+# Install rtk (token-optimizing Bash proxy) — required by the PreToolUse Bash hook
+ARG RTK_VERSION=v0.37.2
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "aarch64" ]; then RTK_ARCH="aarch64-unknown-linux-gnu"; \
+    else RTK_ARCH="x86_64-unknown-linux-musl"; fi && \
+    curl -fsSL "https://github.com/rtk-ai/rtk/releases/download/${RTK_VERSION}/rtk-${RTK_ARCH}.tar.gz" \
+    | tar -xzf - -C /usr/local/bin/ rtk && \
+    chmod 755 /usr/local/bin/rtk
+
+# Symlink node and ruff to macOS Homebrew paths expected by host settings.json hooks
+RUN mkdir -p /opt/homebrew/opt/node@24/bin /opt/homebrew/bin \
+    && ln -sf "$(which node)" /opt/homebrew/opt/node@24/bin/node \
+    && ln -sf "$(which ruff)" /opt/homebrew/bin/ruff
 
 # Create container sentinel so Claude Code skips its built-in auto-updater
 RUN touch /.dockerenv
