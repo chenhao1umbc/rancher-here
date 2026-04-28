@@ -1,0 +1,3 @@
+#!/bin/bash
+# Mounted inside the container by rancher-ollaude; runs claude with the Ollama model.
+exec claude --model kimi-k2.6:cloud "$@"

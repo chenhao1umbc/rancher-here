@@ -1,0 +1,14 @@
+#!/bin/bash
+# Ollama wrapper for rancher-ollaude container
+# Since the container already routes Claude API calls through host Ollama
+# via ANTHROPIC_BASE_URL, this wrapper intercepts "ollama launch claude"
+# and runs claude directly with the same arguments.
+
+if [ "${1:-}" = "launch" ] && [ "${2:-}" = "claude" ]; then
+    shift 2
+    exec claude "$@"
+fi
+
+echo "Error: Only 'ollama launch claude' is supported in the container." >&2
+echo "The container routes API calls through host Ollama automatically." >&2
+exit 1

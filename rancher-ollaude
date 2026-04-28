@@ -1,0 +1,45 @@
+#!/bin/bash
+# Run Claude Code with current directory as workspace, routed through host Ollama server
+#
+# Usage:
+#   rancher-ollaude           # Start interactive shell (claude, claude-auto)
+#   rancher-ollaude <command> # Run specific command directly
+
+CLAUDE_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$CLAUDE_DIR/rancher-lib.sh"
+
+rancher_ensure_image
+rancher_version_check
+rancher_get_oauth_token
+
+echo "Mounting: $CURRENT_DIR"
+
+rancher_it_flag
+
+# ~/.claude-host (ro): entrypoint copies config, plugins, projects into isolated container .claude
+# ~/.claude-writeback (rw): entrypoint syncs session data back to host after exit
+nerdctl run $IT_FLAG --rm \
+  -e "CLAUDE_PROJECT_DIR=$CURRENT_DIR" \
+  -e "CLAUDE_CODE_OAUTH_TOKEN=$OAUTH_TOKEN" \
+  -e "ANTHROPIC_BASE_URL=http://host.lima.internal:11434" \
+  -e "ANTHROPIC_AUTH_TOKEN=ollama" \
+  -e "ANTHROPIC_API_KEY=" \
+  -e "HOST_CLAUDE_DIR=$HOME/.claude" \
+  -v "$CURRENT_DIR:$CURRENT_DIR" \
+  -v "$HOME/.azure:/home/agent/.azure:ro" \
+  -v "$HOME/.claude.json:/home/agent/.claude.json-host:ro" \
+  -v "$HOME/.claude:/home/agent/.claude-host:ro" \
+  -v "$HOME/.claude:/home/agent/.claude-writeback" \
+  -v "$HOME/Documents/research:$HOME/Documents/research:ro" \
+  -v "$HOME/Documents/research/AI_agent:$HOME/Documents/research/AI_agent" \
+  -v "$HOME/Downloads:$HOME/Downloads" \
+  -v "$HOME/Downloads:/home/agent/Downloads" \
+  -v "$HOME/Library/Application Support/rtk:/home/agent/.local/share/rtk" \
+  -v "$CLAUDE_DIR/bin:/opt/ollama-wrappers:ro" \
+  -e "PATH=/opt/ollama-wrappers:/home/agent/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+  -w "$CURRENT_DIR" \
+  "$IMAGE_NAME" "$@"
+CONTAINER_EXIT=$?
+
+rancher_sync_claude_json
+exit $CONTAINER_EXIT
