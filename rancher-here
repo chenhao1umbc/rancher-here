@@ -1,5 +1,6 @@
 #!/bin/bash
-# Run Claude Code with current directory as workspace
+# Run Claude Code with current directory as workspace, routed through host Ollama server
+# Inside the container: use 'claude' for Anthropic (OAuth), 'ollaude' for Ollama (kimi-k2.6:cloud)
 #
 # Usage:
 #   rancher-here           # Start interactive shell (claude, claude-auto)
@@ -21,6 +22,9 @@ rancher_it_flag
 nerdctl run $IT_FLAG --rm \
   -e "CLAUDE_PROJECT_DIR=$CURRENT_DIR" \
   -e "CLAUDE_CODE_OAUTH_TOKEN=$OAUTH_TOKEN" \
+  -e "ANTHROPIC_BASE_URL=http://host.lima.internal:11434" \
+  -e "ANTHROPIC_AUTH_TOKEN=ollama" \
+  -e "ANTHROPIC_API_KEY=" \
   -e "HOST_CLAUDE_DIR=$HOME/.claude" \
   -v "$CURRENT_DIR:$CURRENT_DIR" \
   -v "$HOME/.azure:/home/agent/.azure:ro" \
@@ -31,6 +35,9 @@ nerdctl run $IT_FLAG --rm \
   -v "$HOME/Documents/research/AI_agent:$HOME/Documents/research/AI_agent" \
   -v "$HOME/Downloads:$HOME/Downloads" \
   -v "$HOME/Downloads:/home/agent/Downloads" \
+  -v "$HOME/Library/Application Support/rtk:/home/agent/.local/share/rtk" \
+  -v "$CLAUDE_DIR/bin:/opt/ollama-wrappers:ro" \
+  -e "PATH=/opt/ollama-wrappers:/home/agent/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
   -w "$CURRENT_DIR" \
   "$IMAGE_NAME" "$@"
 CONTAINER_EXIT=$?

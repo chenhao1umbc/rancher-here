@@ -120,22 +120,22 @@ run_test "ollaude: propagates exit code" bash -c '
 
 # Test rancher-ollaude mount points
 
-echo "=== Testing rancher-ollaude mounts ==="
+echo "=== Testing rancher-here mounts ==="
 
-run_test "rancher-ollaude: mounts bin directory" bash -c '
-    grep -q "bin:/opt/ollama-wrappers" "'$PROJECT_DIR'/rancher-ollaude"
+run_test "rancher-here: mounts bin directory" bash -c '
+    grep -q "bin:/opt/ollama-wrappers" "'$PROJECT_DIR'/rancher-here"
 '
 
-run_test "rancher-ollaude: mounts bin directory as ro" bash -c '
-    grep -q "bin:/opt/ollama-wrappers:ro" "'$PROJECT_DIR'/rancher-ollaude"
+run_test "rancher-here: mounts bin directory as ro" bash -c '
+    grep -q "bin:/opt/ollama-wrappers:ro" "'$PROJECT_DIR'/rancher-here"
 '
 
-run_test "rancher-ollaude: mounts rtk data dir" bash -c '
-    grep -q "Library/Application Support/rtk:/home/agent/.local/share/rtk" "'$PROJECT_DIR'/rancher-ollaude"
+run_test "rancher-here: mounts rtk data dir" bash -c '
+    grep -q "Library/Application Support/rtk:/home/agent/.local/share/rtk" "'$PROJECT_DIR'/rancher-here"
 '
 
-run_test "rancher-ollaude: sets PATH with ollama-wrappers (rtk built-in)" bash -c '
-    grep -q "PATH=/opt/ollama-wrappers:" "'$PROJECT_DIR'/rancher-ollaude"
+run_test "rancher-here: sets PATH with ollama-wrappers (rtk built-in)" bash -c '
+    grep -q "PATH=/opt/ollama-wrappers:" "'$PROJECT_DIR'/rancher-here"
 '
 
 # Container integration tests
@@ -217,7 +217,7 @@ fi
 echo "=== Shellcheck ==="
 
 if command -v shellcheck >/dev/null 2>&1; then
-    run_test "shellcheck: rancher-ollaude" shellcheck -x "$PROJECT_DIR/rancher-ollaude"
+    run_test "shellcheck: rancher-here" shellcheck -x "$PROJECT_DIR/rancher-here"
     run_test "shellcheck: bin/ollama" shellcheck "$PROJECT_DIR/bin/ollama"
     run_test "shellcheck: bin/ollaude" shellcheck "$PROJECT_DIR/bin/ollaude"
 else
